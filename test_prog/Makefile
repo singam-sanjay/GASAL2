@@ -1,9 +1,11 @@
-CUDA_LD_LIBRARY=/usr/local/cuda-10.1/targets/x86_64-linux/lib
+CUDA_IN_LIBRARY=/usr/local/cuda-10.2/targets/x86_64-linux/include
+IN_CUDE=-I $(CUDA_IN_LIBRARY)
+CUDA_LD_LIBRARY=/usr/local/cuda-10.2/targets/x86_64-linux/lib
 ANALYSIS_FILENAME=analysis
 # prefix1 can be optirun in case you need to run it from an optimus-enabled laptop.
 PREFIX1=
 #i prefix2 can be nvprof. use preferably the following : nvprof --profile-api-trace none -s -f -o /tmp/.nvprof/$(ANALYSIS_FILENAME).nvprof
-PREFIX2=valgrind
+PREFIX2=#valgrind
 #suffix1 and 2 can be an output file.
 SUFFIX1=> golden.log
 SUFFIX2=> out.log
@@ -22,12 +24,12 @@ FILES_262K=reads_150.fasta ref_150.fasta
 FILES_SHORT=short_query_batch.fasta short_target_batch.fasta
 
 .cpp.o:
-	g++ -std=c++11 -g -c -O3 -Wall -Werror -fopenmp -I ../include  -o test_prog.o test_prog.cpp
+	g++ -std=c++11 -g -c -O3 -Wall -Werror -fopenmp -I ../include -I $(CUDA_IN_LIBRARY) -o test_prog.o test_prog.cpp
 
 all: clean test_prog.out
 
 test_prog.out: test_prog.o
-	g++ -std=c++11 -O3 -o test_prog.out -L$(CUDA_LD_LIBRARY) -L../lib test_prog.o -fopenmp -lcudart -lgasal
+	g++ -std=c++11 -O3 -o test_prog.out $(IN_CUDE) -L$(CUDA_LD_LIBRARY) -L../lib test_prog.o -fopenmp -lgasal -lcudart -lcuda 
 
 clean:
 	rm -f -r *~ *.exe *.o *.out
